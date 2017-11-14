@@ -21,21 +21,19 @@ authedClient.getFills((err, res, body) => {
     });
 })
 
-while(true) {
-    setTimeout(function() {
-        authedClient.getFills((err, res, body) => {
-            JSON.parse(res.body).forEach(fill => {
-                if(knownFills.indexOf(fill.order_id) < 0) {
-                    // Send notification
+setInterval(function() {
+    authedClient.getFills((err, res, body) => {
+        JSON.parse(res.body).forEach(fill => {
+            if(knownFills.indexOf(fill.order_id) < 0) {
+                // Send notification
 
-                    pusher.note(Details.pushbullet.device_id,
-                     `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'}!`,
-                     `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.size} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'} @ ${fill.price}`)
-    
-                    // Add it to the know fills
-                    knownFills.push(fill.order_id)
-                }
-            })
+                pusher.note(Details.pushbullet.device_id,
+                    `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'}!`,
+                    `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.size} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'} @ ${fill.price}`)
+
+                // Add it to the know fills
+                knownFills.push(fill.order_id)
+            }
         })
-    }, 1000)
-}
+    })
+}, 1000)
