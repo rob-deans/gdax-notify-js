@@ -1,0 +1,16 @@
+{
+  "name": "gdax-notify-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "gdax": "^0.4.2",
+    "pushbullet": "^2.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rob Deans",
+  "license": "MIT"
+}
