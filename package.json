@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "gdax": "^0.4.2",
+    "mongodb": "^2.2.33",
     "pushbullet": "^2.1.0"
   },
   "devDependencies": {},

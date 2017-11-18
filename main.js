@@ -1,8 +1,10 @@
 const Gdax = require('gdax')
 const PushBullet = require('pushbullet')
+var mongo = require('mongodb')
 var Details = require('./details.json')
 
 const pusher = new PushBullet(Details.pushbullet.key)
+const URL = 'mongodb://localhost:27017/gdax'
 
 const key = Details.gdax.key
 const b64secret = Details.gdax.secret
@@ -12,32 +14,34 @@ const apiURI = 'https://api.gdax.com';
 
 const authedClient = new Gdax.AuthenticatedClient(key, b64secret, passphrase, apiURI);
 
-let knownFills = []
-
-// Initial fills thing to determine whether or not we have already sent a notification
-authedClient.getFills((err, res, body) => {
-    if(!err) {
-        JSON.parse(res.body).forEach(fill => {
-            knownFills.push(fill.order_id)
-        });
-    }
+mongo.connect(URL, function(err, db) {
+    setInterval(() => {
+        authedClient.getFills((err, res, body) => {
+            if(!err) {
+                let cursor = db.collection('orders').find()
+                let fills = []
+                cursor.forEach(function(doc, err) {
+                    fills.push(doc)
+                }, function() {
+                    // After we have the updated list of fills we check if any of the NEW ones already exist
+                    JSON.parse(res.body).forEach(fill =>  {
+                        let exists = false
+                        fills.forEach(f => {
+                            if(f.order.order_id !== fill.order_id) { 
+                                exists = true
+                                return
+                            }
+                        })
+                        if(!exists) {
+                            db.collection('orders').insertOne({ order: fill }, function(err, result) {
+                                pusher.note(Details.pushbullet.device_id,
+                                            `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'}!`,
+                                            `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.size} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'} @ ${fill.price}`)
+                            })
+                        }
+                    })
+                })
+            }
+        })
+    }, 10000)
 })
-
-setInterval(function() {
-    authedClient.getFills((err, res, body) => {
-        if(!err) {
-            JSON.parse(res.body).forEach(fill => {
-                if(knownFills.indexOf(fill.order_id) < 0) {
-                    // Send notification
-
-                    pusher.note(Details.pushbullet.device_id,
-                        `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'}!`,
-                        `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.size} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'} @ ${fill.price}`)
-
-                    // Add it to the know fills
-                    knownFills.push(fill.order_id)
-                }
-            })
-        }
-    })
-}, 1000)
