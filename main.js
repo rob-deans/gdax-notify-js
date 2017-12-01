@@ -34,9 +34,23 @@ mongo.connect(URL, function(err, db) {
                         })
                         if(!exists) {
                             db.collection('orders').insertOne({ order: fill }, function(err, result) {
+                                let product = 'unknown';
+                                switch (fill.product_id) {
+                                    case 'ETH-EUR':
+                                        product = 'Ethereum';
+                                        break;
+                                    case 'LTC-EUR':
+                                        product = 'Litecoin';
+                                        break;
+                                    case 'BTC-EUR':
+                                        product = 'Bitcoin';
+                                        break;
+                                }
+
                                 pusher.note(Details.pushbullet.device_id,
-                                            `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'}!`,
-                                            `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.size} ${fill.product_id == 'ETH-EUR' ? 'Ethereum' : 'Litecoin'} @ ${fill.price}`)
+                                            `${fill.side=='sell' ? 'Sold' : 'Bought'} ${product}!`,
+                                            `${fill.side=='sell' ? 'Sold' : 'Bought'} ${fill.size} ${product} @ ${fill.price}`)
+                                console.log(`[Notification] ${product}`)
                             })
                         }
                     })
