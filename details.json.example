@@ -1,0 +1,11 @@
+{
+    "pushbullet": {
+        "key": "<YOUR PB KEY>",
+        "device_id": "<YOUR DEVICE ID FOR PB>"
+    },
+    "gdax": {
+        "key": "<YOUR GDAX KEY>",
+        "secret": "<YOUR GDAX SECRET KEY>",
+        "passphrase": "<YOUR GDAX PASSPHRASE>"
+    }
+}
