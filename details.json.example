@@ -7,5 +7,6 @@
         "key": "<YOUR GDAX KEY>",
         "secret": "<YOUR GDAX SECRET KEY>",
         "passphrase": "<YOUR GDAX PASSPHRASE>"
-    }
+    },
+    timeout: 10000
 }
