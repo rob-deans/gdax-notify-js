@@ -20,13 +20,13 @@ mongo.connect(URL, function(err, db) {
             if(!err) {
                 let cursor = db.collection('orders').find()
                 let fills = []
-                cursor.forEach(function(doc, err) {
+                cursor.forEach((doc, err) => {
                     fills.push(doc)
-                }, function() {
+                }, () => {
                     // After we have the updated list of fills we check if any of the NEW ones already exist
                     JSON.parse(res.body).forEach(fill =>  {
                         let exists = false
-                        fills.forEach(f => {
+                        fills.forEach((f) => {
                             if(f.order.order_id !== fill.order_id) { 
                                 exists = true
                                 return
@@ -57,5 +57,5 @@ mongo.connect(URL, function(err, db) {
                 })
             }
         })
-    }, 10000)
+    }, Details.timeout)
 })
